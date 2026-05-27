@@ -8,7 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/* SERVICES */
+// SERVICES
 model Service {
   id               Int               @id @default(autoincrement())
   name             String
@@ -16,7 +16,7 @@ model Service {
   allocationStates AllocationState[]
 }
 
-/* PROVIDERS */
+// PROVIDERS
 model Provider {
   id              Int              @id @default(autoincrement())
   name            String
@@ -28,7 +28,7 @@ model Provider {
   leadAssignments LeadAssignment[]
 }
 
-/* LEADS */
+// LEADS
 model Lead {
   id          Int              @id @default(autoincrement())
   name        String
@@ -46,7 +46,7 @@ model Lead {
   @@unique([phone, serviceId])
 }
 
-/* LEAD ↔ PROVIDER */
+// LEAD ↔ PROVIDER
 model LeadAssignment {
   id         Int      @id @default(autoincrement())
   leadId     Int
@@ -60,26 +60,26 @@ model LeadAssignment {
   @@unique([leadId, providerId])
 }
 
-/* ROUND ROBIN STATE */
+// ROUND ROBIN STATE
 model AllocationState {
-  id        Int     @id @default(autoincrement())
-  serviceId Int     @unique
-  poolIndex Int     @default(0)
+  id        Int      @id @default(autoincrement())
+  serviceId Int      @unique
+  poolIndex Int      @default(0)
 
-  service   Service @relation(fields: [serviceId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
 
   updatedAt DateTime @updatedAt
 }
 
-/* WEBHOOK IDEMPOTENCY */
+// WEBHOOK IDEMPOTENCY
 model WebhookEvent {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
 
-  eventId     String   @unique
+  eventId     String    @unique
 
   // CRITICAL FIX
-  processed   Boolean  @default(false)
+  processed   Boolean   @default(false)
 
   processedAt DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }
