@@ -74,12 +74,8 @@ model AllocationState {
 // WEBHOOK IDEMPOTENCY
 model WebhookEvent {
   id          Int       @id @default(autoincrement())
-
   eventId     String    @unique
-
-  // CRITICAL FIX
   processed   Boolean   @default(false)
-
   processedAt DateTime?
   createdAt   DateTime  @default(now())
 }
