@@ -15,36 +15,34 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        id: "asc",
-      },
+      orderBy: { id: "asc" },
     });
 
-    // safe calculations
     const totalProviders = providers.length;
 
-    const totalLeads = providers.reduce((sum, provider) => {
-      return sum + (provider.leadsCount || 0);
-    }, 0);
+    const totalLeads = providers.reduce(
+      (sum, provider) => sum + (provider.leadsCount || 0),
+      0
+    );
 
+    // IMPORTANT: ALWAYS SAME SHAPE
     return NextResponse.json({
       success: true,
-      data: providers, // IMPORTANT: keep array for frontend compatibility
-      stats: {
+      data: {
+        providers,
         totalProviders,
         totalLeads,
       },
     });
 
   } catch (error) {
-    console.error("Dashboard API error:", error);
+    console.error("Dashboard error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch dashboard data",
-        data: [],
-        stats: {
+        data: {
+          providers: [],
           totalProviders: 0,
           totalLeads: 0,
         },

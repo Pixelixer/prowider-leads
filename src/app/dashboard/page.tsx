@@ -29,8 +29,8 @@ export default function DashboardPage() {
       const result = await response.json();
 
       if (result.success) {
-        // ✅ FIX: ensure array is always passed
-        setProviders(Array.isArray(result.data) ? result.data : []);
+        const data = result.data;
+setProviders(Array.isArray(data) ? data : data?.providers || []);
       }
     } catch (error) {
       console.error(error);
@@ -43,8 +43,14 @@ export default function DashboardPage() {
     fetchDashboard();
 
     const eventSource = new EventSource("/api/sse");
+
     eventSource.onmessage = () => {
       fetchDashboard();
+    };
+
+    // FIX 2: SSE error safety (silent failure fix)
+    eventSource.onerror = () => {
+      console.error("SSE connection failed");
     };
 
     const interval = setInterval(fetchDashboard, 5000);
@@ -119,8 +125,12 @@ export default function DashboardPage() {
 
             <tbody>
               {providers.map((provider) => {
+
+                // FIX 3: safe division (NaN protection)
                 const percentage =
-                  (provider.leadsCount / provider.monthlyQuota) * 100;
+                  provider.monthlyQuota > 0
+                    ? (provider.leadsCount / provider.monthlyQuota) * 100
+                    : 0;
 
                 const remaining =
                   provider.monthlyQuota - provider.leadsCount;
@@ -174,7 +184,7 @@ export default function DashboardPage() {
         <div className="space-y-5">
           {providers
             .flatMap((p) =>
-              (p.leadAssignments || []).map((a) => ({
+              (p.leadAssignments ?? []).map((a) => ({
                 ...a.lead,
                 providerName: p.name,
               }))
