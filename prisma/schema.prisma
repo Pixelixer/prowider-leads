@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/* SERVICES */
+model Service {
+  id               Int               @id @default(autoincrement())
+  name             String
+  leads            Lead[]
+  allocationStates AllocationState[]
+}
+
+/* PROVIDERS */
+model Provider {
+  id              Int              @id @default(autoincrement())
+  name            String
+  monthlyQuota    Int              @default(10)
+
+  // IMPORTANT: do NOT fully rely on this for logic, only for quick display
+  leadsCount      Int              @default(0)
+
+  leadAssignments LeadAssignment[]
+}
+
+/* LEADS */
+model Lead {
+  id          Int              @id @default(autoincrement())
+  name        String
+  phone       String
+  city        String
+  description String
+
+  serviceId   Int
+  service     Service          @relation(fields: [serviceId], references: [id])
+
+  assignments LeadAssignment[]
+
+  createdAt   DateTime         @default(now())
+
+  @@unique([phone, serviceId])
+}
+
+/* LEAD ↔ PROVIDER */
+model LeadAssignment {
+  id         Int      @id @default(autoincrement())
+  leadId     Int
+  providerId Int
+
+  lead       Lead     @relation(fields: [leadId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@unique([leadId, providerId])
+}
+
+/* ROUND ROBIN STATE */
+model AllocationState {
+  id        Int     @id @default(autoincrement())
+  serviceId Int     @unique
+  poolIndex Int     @default(0)
+
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  updatedAt DateTime @updatedAt
+}
+
+/* WEBHOOK IDEMPOTENCY */
+model WebhookEvent {
+  id          Int      @id @default(autoincrement())
+
+  eventId     String   @unique
+
+  // CRITICAL FIX
+  processed   Boolean  @default(false)
+
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+}
