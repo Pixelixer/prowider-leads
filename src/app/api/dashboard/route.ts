@@ -21,9 +21,11 @@ export async function GET() {
     const totalProviders = providers.length;
 
     const totalLeads = providers.reduce(
-      (sum, provider) => sum + (provider.leadsCount || 0),
-      0
-    );
+  (sum: number, provider: any) => {
+    return sum + (provider.leadsCount || 0);
+  },
+  0
+);
 
     // IMPORTANT: ALWAYS SAME SHAPE
     return NextResponse.json({
