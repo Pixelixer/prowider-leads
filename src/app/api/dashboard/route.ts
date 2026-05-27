@@ -21,10 +21,12 @@ export async function GET() {
     const totalProviders = providers.length;
 
     // SAFE reduce (no TS/Vercel strict issues)
-    const totalLeads = (providers as any[]).reduce(
-      (sum, provider) => sum + (provider?.leadsCount ?? 0),
-      0
-    );
+    const totalLeads = providers.reduce(
+  (sum: number, provider: { leadsCount?: number }) => {
+    return sum + (provider.leadsCount ?? 0);
+  },
+  0
+);
 
     return NextResponse.json({
       success: true,
