@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { PrismaClient, Prisma } from '@prisma/client';
 import { sendSSEUpdate } from "@/app/api/sse/route";
 
 const MANDATORY: Record<number, number[]> = {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Prevent duplicate lead (DB level safety)
       const existing = await tx.lead.findUnique({
         where: { phone_serviceId: { phone, serviceId: sid } },
